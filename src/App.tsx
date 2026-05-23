@@ -22,7 +22,7 @@ export default function App() {
     <ErrorBoundary>
       <ThemeProvider>
         <ToastProvider>
-          <BrowserRouter>
+          <BrowserRouter basename={import.meta.env.PROD ? "/raktavahini-web" : ""}>
             <Routes>
               <Route element={<Layout />}>
                 <Route path="/" element={<Navigate to="/search" replace />} />

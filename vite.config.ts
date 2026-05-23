@@ -4,7 +4,11 @@ import tailwindcss from '@tailwindcss/vite'
 
 import path from "path"
 
+const REPO = "raktavahini-web";
+const isDev = process.env.NODE_ENV !== "production";
+
 export default defineConfig({
+  base: isDev ? "/" : `/${REPO}/`,
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {
