@@ -5,6 +5,8 @@ import RaktButton from "./RaktButton";
 import { formatFullDate, isEligible as checkEligible } from "@/lib/utils";
 import { addDonationLog } from "@/hooks/useDonationLogs";
 import { updateDonor } from "@/hooks/useDonors";
+import { useAuth } from "@/hooks/useAuth";
+import { useToast } from "@/providers/ToastProvider";
 import type { Donor } from "@/types";
 
 interface UserDetailModalProps {
@@ -14,11 +16,17 @@ interface UserDetailModalProps {
 
 export default function UserDetailModal({ donor, onClose }: UserDetailModalProps) {
   const navigate = useNavigate();
+  const { user } = useAuth();
+  const { toast } = useToast();
   const eligible = checkEligible(donor.lastDonationMs);
   const [hospitalName, setHospitalName] = useState("");
   const [logging, setLogging] = useState(false);
 
   const handleLogDonation = async () => {
+    if (!user) {
+      toast("You must be signed in to log a donation.", "warning");
+      return;
+    }
     const hName = hospitalName.trim() || "General Hospital";
     setLogging(true);
     try {
@@ -42,7 +50,7 @@ export default function UserDetailModal({ donor, onClose }: UserDetailModalProps
         },
       });
     } catch {
-      alert("Failed to log donation.");
+      toast("Failed to log donation.", "error");
     } finally {
       setLogging(false);
     }
@@ -50,26 +58,24 @@ export default function UserDetailModal({ donor, onClose }: UserDetailModalProps
 
   return (
     <div className="fixed inset-0 z-50 bg-white dark:bg-gray-900 flex flex-col">
-      {/* Header */}
       <div className="bg-rakta-red text-white px-4 py-3 flex items-center gap-3">
-        <button onClick={onClose} className="p-1">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <button onClick={onClose} className="p-1" aria-label="Close">
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
           </svg>
         </button>
         <p className="text-lg font-bold">Details</p>
       </div>
 
-      {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
         <div className="flex flex-col items-center gap-2">
           <BloodBadge group={donor.group} size={80} textSize="32px" />
           <p className="text-2xl font-bold">{donor.name}</p>
           <p className="text-gray-500 font-bold">
-            Age: {donor.age} • Gender: {donor.gender}
+            Age: {donor.age} &bull; Gender: {donor.gender}
           </p>
           <span className="bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 text-xs font-bold px-3 py-1 rounded-full">
-            ★ {donor.freq} Lifetime Donations
+            {donor.freq} Lifetime Donations
           </span>
         </div>
 
@@ -78,15 +84,15 @@ export default function UserDetailModal({ donor, onClose }: UserDetailModalProps
             ? "bg-green-50 dark:bg-green-900 text-green-700 dark:text-green-300"
             : "bg-red-50 dark:bg-red-900 text-red-700 dark:text-red-300"
         }`}>
-          {eligible ? "✅ Eligible" : "🚫 Not Eligible"}
+          {eligible ? "Eligible" : "Not Eligible"}
         </div>
 
         <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4 space-y-2 text-sm">
-          <p>📍 Address: {donor.address}</p>
-          <p>🕒 Last Donated: {formatFullDate(donor.lastDonationMs)}</p>
+          <p>Address: {donor.address}</p>
+          <p>Last Donated: {formatFullDate(donor.lastDonationMs)}</p>
           <hr className="border-gray-200 dark:border-gray-700 my-2" />
-          <p>📱 Primary Mobile: +91 {donor.phone}</p>
-          <p>📞 Alternate Mobile: +91 {donor.altPhone}</p>
+          <p>Primary Mobile: {donor.phone}</p>
+          <p>Alternate Mobile: {donor.altPhone}</p>
         </div>
 
         <a
@@ -95,7 +101,7 @@ export default function UserDetailModal({ donor, onClose }: UserDetailModalProps
           target="_blank"
           rel="noopener noreferrer"
         >
-          <RaktButton>📞 Secure Call</RaktButton>
+          <RaktButton>Call {donor.phone}</RaktButton>
         </a>
 
         <hr className="border-gray-200 dark:border-gray-700" />
@@ -114,7 +120,7 @@ export default function UserDetailModal({ donor, onClose }: UserDetailModalProps
             disabled={logging}
             className="w-full bg-rakta-red text-white font-bold py-3 rounded-xl disabled:opacity-50"
           >
-            {logging ? "Logging..." : "I Donated Today ❤️"}
+            {logging ? "Logging..." : "I Donated Today"}
           </button>
         </div>
       </div>

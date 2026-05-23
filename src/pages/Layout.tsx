@@ -1,47 +1,79 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Search, UserPlus, Building2, Smile, History, Settings, PhoneCall } from "lucide-react";
+import { useAuth, signInWithGoogle, signOut as authSignOut } from "@/hooks/useAuth";
+import { useToast } from "@/providers/ToastProvider";
 
 const tabs = [
-  { path: "/search", label: "Search", icon: "🔍" },
-  { path: "/register", label: "Profile", icon: "👤" },
-  { path: "/hospitals", label: "Hospitals", icon: "🏥" },
-  { path: "/donors", label: "Donors", icon: "😊" },
-  { path: "/history", label: "Log", icon: "📅" },
+  { path: "/search", label: "Search", icon: Search },
+  { path: "/register", label: "Profile", icon: UserPlus },
+  { path: "/hospitals", label: "Hospitals", icon: Building2 },
+  { path: "/donors", label: "Donors", icon: Smile },
+  { path: "/history", label: "Log", icon: History },
 ];
 
 export default function Layout() {
   const navigate = useNavigate();
   const location = useLocation();
+  const { user } = useAuth();
+  const { toast } = useToast();
+
+  const handleSettings = () => navigate("/settings");
+
+  const handleAuth = async () => {
+    if (user) {
+      try {
+        await authSignOut();
+        toast("Signed out", "info");
+      } catch {
+        toast("Sign out failed", "error");
+      }
+    } else {
+      try {
+        await signInWithGoogle();
+        toast("Signed in with Google", "success");
+      } catch {
+        toast("Sign in failed", "error");
+      }
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100">
-      {/* Top Navbar */}
       <header className="bg-rakta-red text-white px-4 py-3 flex items-center justify-between">
-        <h1 className="text-lg font-extrabold">🩸 Rakta-Vahini</h1>
-        <button onClick={() => navigate("/settings")} className="p-1">
-          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-          </svg>
-        </button>
+        <div className="flex items-center gap-2">
+          <span className="text-xl" aria-hidden="true">&#x1FA78;</span>
+          <h1 className="text-lg font-extrabold">Rakta-Vahini</h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={handleAuth}
+            className="text-xs font-medium bg-white/20 hover:bg-white/30 px-3 py-1.5 rounded-full transition-colors"
+            title={user ? "Sign out" : "Sign in with Google"}
+          >
+            {user ? "Sign Out" : "Sign In"}
+          </button>
+          <button onClick={handleSettings} className="p-1" aria-label="Settings">
+            <Settings className="w-5 h-5" aria-hidden="true" />
+          </button>
+        </div>
       </header>
 
-      {/* Page Content */}
       <main className="pb-20">
         <Outlet />
       </main>
 
-      {/* SOS FAB */}
       <button
         onClick={() => navigate("/emergency")}
-        className="fixed bottom-20 right-4 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-red-500 to-orange-300 text-white text-2xl shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
+        className="fixed bottom-20 right-4 z-50 w-14 h-14 rounded-full bg-gradient-to-br from-red-500 to-orange-300 text-white shadow-lg hover:shadow-xl transition-shadow flex items-center justify-center"
+        aria-label="Emergency SOS"
       >
-        🚨
+        <PhoneCall className="w-6 h-6" />
       </button>
 
-      {/* Bottom Tab Bar */}
       <nav className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 z-40">
         <div className="flex justify-around">
           {tabs.map((tab) => {
+            const Icon = tab.icon;
             const active = location.pathname === tab.path || 
               (tab.path === "/register" && location.pathname.startsWith("/register"));
             return (
@@ -53,8 +85,9 @@ export default function Layout() {
                     ? "text-rakta-red"
                     : "text-gray-500 dark:text-gray-400"
                 }`}
+                aria-label={tab.label}
               >
-                <span className="text-lg">{tab.icon}</span>
+                <Icon className="w-5 h-5 mb-0.5" aria-hidden="true" />
                 <span>{tab.label}</span>
               </button>
             );

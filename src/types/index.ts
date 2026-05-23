@@ -2,7 +2,7 @@ export interface Donor {
   uid: string;
   name: string;
   email: string;
-  age: string;
+  age: number;
   gender: string;
   group: string;
   phone: string;
@@ -44,7 +44,7 @@ export interface EmergencyRequest {
   id: string;
   requesterId: string;
   bloodGroup: string;
-  units: string;
+  units: number;
   lat: number;
   lng: number;
   status: string;

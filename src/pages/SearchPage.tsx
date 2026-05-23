@@ -14,31 +14,37 @@ import SkeletonCard from "@/components/shared/SkeletonCard";
 import DonorCard from "@/components/shared/DonorCard";
 import UserDetailModal from "@/components/shared/UserDetailModal";
 import DonorMap from "@/components/map/DonorMap";
+import { useToast } from "@/providers/ToastProvider";
 import type { Donor } from "@/types";
 
 export default function SearchPage() {
   const { donors, loading } = useDonors();
+  const { toast } = useToast();
   const [selectedGroup, setSelectedGroup] = useState("O+");
   const [radius, setRadius] = useState(20);
   const [userLocation, setUserLocation] = useState<{ lat: number; lng: number } | null>(null);
   const [locating, setLocating] = useState(false);
   const [selectedDonor, setSelectedDonor] = useState<Donor | null>(null);
   const [showMap, setShowMap] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
 
   const fetchLocation = () => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
+      setLocationError("Geolocation is not supported by your browser.");
+      toast("Geolocation is not supported by your browser.", "error");
       return;
     }
     setLocating(true);
+    setLocationError(null);
     navigator.geolocation.getCurrentPosition(
       (pos) => {
         setUserLocation({ lat: pos.coords.latitude, lng: pos.coords.longitude });
         setLocating(false);
+        toast("Location fetched successfully", "success");
       },
       () => {
-        // Fallback to Bangalore if denied
-        setUserLocation({ lat: 28.6139, lng: 77.209 });
+        setLocationError("Location access denied. Please enable location in your browser settings.");
+        toast("Location access denied. Enable location and try again.", "warning");
         setLocating(false);
       },
       { enableHighAccuracy: true, timeout: 10000 }
@@ -66,16 +72,18 @@ export default function SearchPage() {
     <div className="p-4 space-y-4">
       <h1 className="text-2xl font-bold">Find Eligible Donors</h1>
 
-      {/* Fetch Location Button */}
       <button
         onClick={fetchLocation}
         disabled={locating}
         className="w-full bg-blue-50 dark:bg-blue-900 text-blue-700 dark:text-blue-300 font-bold py-3 rounded-xl hover:bg-blue-100 dark:hover:bg-blue-800 transition-colors disabled:opacity-50"
       >
-        {locating ? "📍 Locating..." : "📍 Fetch My Live Location"}
+        {locating ? "Locating..." : "Fetch My Live Location"}
       </button>
 
-      {/* Map Toggle */}
+      {locationError && (
+        <p className="text-xs text-red-500 text-center">{locationError}</p>
+      )}
+
       {userLocation && (
         <button
           onClick={() => setShowMap(!showMap)}
@@ -85,7 +93,7 @@ export default function SearchPage() {
               : "bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300"
           }`}
         >
-          {showMap ? "📋 Show List" : "🗺️ Show Map"}
+          {showMap ? "Show List" : "Show Map"}
         </button>
       )}
 
@@ -106,7 +114,6 @@ export default function SearchPage() {
         />
       )}
 
-      {/* Blood Group Select */}
       <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm p-4 space-y-4">
         <div>
           <label className="text-sm font-medium text-gray-500 mb-1 block">Required Blood Group</label>
@@ -124,7 +131,6 @@ export default function SearchPage() {
           </Select>
         </div>
 
-        {/* Radius Slider */}
         <div>
           <label className="text-sm font-medium text-rakta-red mb-1 block">
             Search Radius: {radius} km
@@ -141,7 +147,6 @@ export default function SearchPage() {
         </div>
       </div>
 
-      {/* Results */}
       <p className="text-xs font-bold text-gray-400 uppercase tracking-wider">Intelligent Results</p>
 
       {loading || locating ? (
@@ -166,7 +171,7 @@ export default function SearchPage() {
 
       {userLocation && (
         <p className="text-xs text-gray-400 text-center">
-          📍 Location: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
+          Location: {userLocation.lat.toFixed(4)}, {userLocation.lng.toFixed(4)}
         </p>
       )}
 

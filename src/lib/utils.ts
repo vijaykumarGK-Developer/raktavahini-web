@@ -35,3 +35,30 @@ export function formatFullDate(timestamp: number): string {
     weekday: "long", year: "numeric", month: "long", day: "numeric",
   }).format(new Date(timestamp));
 }
+
+export function validatePhone(phone: string): string | null {
+  if (!phone) return "Phone number is required";
+  if (!/^[+]?[\d\s()-]{7,20}$/.test(phone)) return "Invalid phone number";
+  return null;
+}
+
+export function validateEmail(email: string): string | null {
+  if (!email) return null;
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return "Invalid email address";
+  return null;
+}
+
+export function validateAge(age: number): string | null {
+  if (!age || age < 18 || age > 120) return "Age must be between 18 and 120";
+  return null;
+}
+
+export function validateName(name: string): string | null {
+  if (!name || name.trim().length < 2) return "Name must be at least 2 characters";
+  return null;
+}
+
+export function validateRequired(value: string, fieldName: string): string | null {
+  if (!value || value.trim().length === 0) return `${fieldName} is required`;
+  return null;
+}
