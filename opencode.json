@@ -1,0 +1,41 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "agent": {
+    "scaffolder": {
+      "description": "Scaffolds the Rakta-Vahini web app project. Handles Vite+React+TS setup, Tailwind/shadcn/ui init, Firebase SDK config, React Router wiring, and shared UI kit ported from the Android app.",
+      "mode": "subagent",
+      "model": "openai/gpt-4o",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "feature-builder": {
+      "description": "Builds all pages, forms, modals, and feature screens for the Rakta-Vahini web app. Handles SearchPage, User/Hospital registration, Donors/Hospitals/History listing pages, Emergency SOS page, Certificate page, Settings, Profile Edit, detail modals, and static pages (About, Privacy, Contact). Wires everything to Firebase hooks.",
+      "mode": "subagent",
+      "model": "openai/gpt-4o",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    },
+    "map-specialist": {
+      "description": "Handles all Leaflet map integration and geolocation features for the Rakta-Vahini web app. Implements donor location markers, radius circle overlays, geolocation API integration ('Fetch My Live Location'), and click-to-pick location on registration forms.",
+      "mode": "subagent",
+      "model": "openai/gpt-4o",
+      "permission": {
+        "edit": "allow",
+        "bash": "allow",
+        "read": "allow",
+        "glob": "allow",
+        "grep": "allow"
+      }
+    }
+  }
+}

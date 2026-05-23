@@ -1,0 +1,28 @@
+import { useState, useEffect } from "react";
+import { onAuthStateChanged, signInWithPopup, GoogleAuthProvider, signOut as fbSignOut, User } from "firebase/auth";
+import { auth } from "@/lib/firebase";
+
+export function useAuth() {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const unsub = onAuthStateChanged(auth, (u) => {
+      setUser(u);
+      setLoading(false);
+    });
+    return unsub;
+  }, []);
+
+  return { user, loading };
+}
+
+export async function signInWithGoogle(): Promise<User> {
+  const provider = new GoogleAuthProvider();
+  const result = await signInWithPopup(auth, provider);
+  return result.user;
+}
+
+export async function signOut(): Promise<void> {
+  await fbSignOut(auth);
+}
